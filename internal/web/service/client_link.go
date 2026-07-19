@@ -55,7 +55,6 @@ func (s *ClientService) SyncInbound(tx *gorm.DB, inboundId int, clients []model.
 			continue
 		}
 
-		rawRatio := clients[i].TrafficRatio
 		incoming := clients[i].ToRecord()
 		row, ok := existing[email]
 		if !ok {
@@ -103,9 +102,6 @@ func (s *ClientService) SyncInbound(tx *gorm.DB, inboundId int, clients []model.
 		row.SubID = incoming.SubID
 		row.LimitIP = incoming.LimitIP
 		row.TotalGB = incoming.TotalGB
-		if rawRatio > 0 {
-			row.TrafficRatio = incoming.TrafficRatio
-		}
 		row.ExpiryTime = incoming.ExpiryTime
 		row.Enable = incoming.Enable
 		row.TgID = incoming.TgID

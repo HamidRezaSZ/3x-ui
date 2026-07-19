@@ -254,7 +254,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "subId": "",
     "tgId": 0,
     "totalGB": 0,
-    "trafficRatio": 1,
     "updated_at": 0
   },
   "ClientInbound": {
@@ -288,7 +287,6 @@ export const EXAMPLES: Record<string, unknown> = {
     "subId": "",
     "tgId": 0,
     "totalGB": 0,
-    "trafficRatio": 1,
     "updatedAt": 0,
     "uuid": ""
   },
@@ -447,6 +445,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subSortIndex": 1,
     "tag": "in-443-tcp",
     "total": 0,
+    "trafficRatio": 1,
     "trafficReset": "never",
     "up": 0
   },

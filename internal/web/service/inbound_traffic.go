@@ -22,7 +22,7 @@ import (
 )
 
 func scaleTrafficBytes(n int64, ratio float64) int64 {
-	ratio = model.NormalizeClientTrafficRatio(ratio)
+	ratio = model.NormalizeTrafficRatio(ratio)
 	if ratio == 1 || n == 0 {
 		return n
 	}
@@ -36,28 +36,38 @@ func scaleTrafficBytes(n int64, ratio float64) int64 {
 	return int64(scaled)
 }
 
-func loadClientTrafficRatios(tx *gorm.DB, emails []string) (map[string]float64, error) {
+func loadInboundTrafficRatiosByEmail(tx *gorm.DB, emails []string) (map[string]float64, error) {
 	out := make(map[string]float64, len(emails))
 	if len(emails) == 0 {
 		return out, nil
 	}
 	type row struct {
 		Email        string
+		InboundID    int     `gorm:"column:inbound_id"`
 		TrafficRatio float64 `gorm:"column:traffic_ratio"`
 	}
 	var rows []row
 	for _, batch := range chunkStrings(emails, sqliteMaxVars) {
 		var part []row
-		if err := tx.Model(&model.ClientRecord{}).
-			Select("email, traffic_ratio").
-			Where("email IN ?", batch).
-			Find(&part).Error; err != nil {
+		if err := tx.Raw(
+			`SELECT c.email AS email, ci.inbound_id AS inbound_id, i.traffic_ratio AS traffic_ratio
+			 FROM clients c
+			 JOIN client_inbounds ci ON ci.client_id = c.id
+			 JOIN inbounds i ON i.id = ci.inbound_id
+			 WHERE c.email IN ?`,
+			batch,
+		).Scan(&part).Error; err != nil {
 			return nil, err
 		}
 		rows = append(rows, part...)
 	}
+	bestInbound := make(map[string]int, len(emails))
 	for _, r := range rows {
-		out[r.Email] = model.NormalizeClientTrafficRatio(r.TrafficRatio)
+		prev, seen := bestInbound[r.Email]
+		if !seen || r.InboundID < prev {
+			bestInbound[r.Email] = r.InboundID
+			out[r.Email] = model.NormalizeTrafficRatio(r.TrafficRatio)
+		}
 	}
 	return out, nil
 }
@@ -180,7 +190,7 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 	for _, ct := range dbClientTraffics {
 		ratioEmails = append(ratioEmails, ct.Email)
 	}
-	ratios, err := loadClientTrafficRatios(tx, ratioEmails)
+	ratios, err := loadInboundTrafficRatiosByEmail(tx, ratioEmails)
 	if err != nil {
 		return err
 	}

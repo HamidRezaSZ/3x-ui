@@ -278,7 +278,6 @@ export const ClientSchema = z.object({
   subId: z.string(),
   tgId: z.number().int(),
   totalGB: z.number().int(),
-  trafficRatio: z.number(),
   updated_at: z.number().int().optional(),
 });
 export type Client = z.infer<typeof ClientSchema>;
@@ -316,7 +315,6 @@ export const ClientRecordSchema = z.object({
   subId: z.string(),
   tgId: z.number().int(),
   totalGB: z.number().int(),
-  trafficRatio: z.number(),
   updatedAt: z.number().int(),
   uuid: z.string(),
 });
@@ -450,6 +448,7 @@ export const InboundSchema = z.object({
   subSortIndex: z.number().int().min(1),
   tag: z.string(),
   total: z.number().int(),
+  trafficRatio: z.number(),
   trafficReset: z.enum(['never', 'hourly', 'daily', 'weekly', 'monthly']),
   up: z.number().int(),
 });

@@ -115,7 +115,6 @@ const EMPTY: Values = {
   security: 'auto',
   reverseTag: '',
   totalGB: 0,
-  trafficRatio: 1,
   expiryDate: 0,
   delayedStart: false,
   delayedDays: 0,
@@ -230,7 +229,6 @@ export default function ClientFormModal({
           : client.security,
         reverseTag: client.reverse?.tag || '',
         totalGB: bytesToGB(client.totalGB || 0),
-        trafficRatio: client.trafficRatio && client.trafficRatio > 0 ? client.trafficRatio : 1,
         reset: Number(client.reset) || 0,
         limitIp: client.limitIp || 0,
         tgId: Number(client.tgId) || 0,
@@ -482,7 +480,6 @@ export default function ClientFormModal({
       security: values.security,
       reverseTag: values.reverseTag,
       totalGB: values.totalGB,
-      trafficRatio: values.trafficRatio,
       delayedStart: values.delayedStart,
       delayedDays: values.delayedDays,
       reset: values.reset,
@@ -511,7 +508,6 @@ export default function ClientFormModal({
       flow: showFlow ? (values.flow || '') : '',
       security: showSecurity ? (values.security || 'auto') : 'auto',
       totalGB: totalBytes,
-      trafficRatio: Number(values.trafficRatio) > 0 ? Number(values.trafficRatio) : 1,
       expiryTime,
       reset: Number(values.reset) || 0,
       limitIp: Number(values.limitIp) || 0,
@@ -644,7 +640,7 @@ export default function ClientFormModal({
                             </Space.Compact>
                           </Form.Item>
                         </Col>
-                        <Col xs={24} md={4}>
+                        <Col xs={24} md={6}>
                           <FormField
                             name="totalGB"
                             label={t('pages.clients.totalGB')}
@@ -654,17 +650,7 @@ export default function ClientFormModal({
                             <InputNumber min={0} step={1} style={{ width: '100%' }} />
                           </FormField>
                         </Col>
-                        <Col xs={24} md={4}>
-                          <FormField
-                            name="trafficRatio"
-                            label={t('pages.clients.trafficRatio')}
-                            tooltip={t('pages.clients.trafficRatioDesc')}
-                            transform={{ output: (v) => (Number(v) > 0 ? Number(v) : 1) }}
-                          >
-                            <InputNumber min={0.1} step={0.1} style={{ width: '100%' }} />
-                          </FormField>
-                        </Col>
-                        <Col xs={24} md={4}>
+                        <Col xs={24} md={6}>
                           <Form.Item label={t('pages.clients.limitIp')} tooltip={t('pages.clients.limitIpDesc')}>
                             <Tooltip title={limitIpNotice || undefined}>
                               <span style={{ display: 'flex', width: '100%' }}>

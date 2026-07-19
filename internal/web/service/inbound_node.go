@@ -481,11 +481,6 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 		}
 	}()
 
-	ratios, err := loadClientTrafficRatios(tx, snapEmailList)
-	if err != nil {
-		return false, err
-	}
-
 	structuralChange := false
 
 	var adoptedInbounds []*model.Inbound
@@ -746,7 +741,7 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 				if deltaDown = canon.Down - base.Down; deltaDown < 0 {
 					deltaDown = 0
 				}
-				ratio := ratios[cs.Email]
+				ratio := model.NormalizeTrafficRatio(c.TrafficRatio)
 				deltaUp = scaleTrafficBytes(deltaUp, ratio)
 				deltaDown = scaleTrafficBytes(deltaDown, ratio)
 			}

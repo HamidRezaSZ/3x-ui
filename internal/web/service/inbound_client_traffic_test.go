@@ -242,10 +242,21 @@ func TestAddClientTraffic_AppliesTrafficRatio(t *testing.T) {
 
 	db := database.GetDB()
 	const email = "ratio-user"
-	if err := db.Create(&model.ClientRecord{Email: email, Enable: true, TrafficRatio: 2}).Error; err != nil {
+	inbound := &model.Inbound{
+		UserId: 1, Tag: "ratio-in", Enable: true, Port: 40010, Protocol: model.VLESS,
+		TrafficRatio: 2,
+	}
+	if err := db.Create(inbound).Error; err != nil {
+		t.Fatalf("create inbound: %v", err)
+	}
+	rec := &model.ClientRecord{Email: email, Enable: true}
+	if err := db.Create(rec).Error; err != nil {
 		t.Fatalf("create client: %v", err)
 	}
-	if err := db.Create(&xray.ClientTraffic{InboundId: 1, Email: email, Enable: true}).Error; err != nil {
+	if err := db.Create(&model.ClientInbound{ClientId: rec.Id, InboundId: inbound.Id}).Error; err != nil {
+		t.Fatalf("attach client: %v", err)
+	}
+	if err := db.Create(&xray.ClientTraffic{InboundId: inbound.Id, Email: email, Enable: true}).Error; err != nil {
 		t.Fatalf("create traffic row: %v", err)
 	}
 
@@ -261,7 +272,7 @@ func TestAddClientTraffic_AppliesTrafficRatio(t *testing.T) {
 		t.Fatalf("reload traffic: %v", err)
 	}
 	if row.Up != 20 || row.Down != 10 {
-		t.Errorf("ratio=2 did not double usage: up=%d down=%d, want 20/10", row.Up, row.Down)
+		t.Errorf("inbound ratio=2 did not double usage: up=%d down=%d, want 20/10", row.Up, row.Down)
 	}
 }
 
